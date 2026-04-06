@@ -1834,7 +1834,7 @@ body.loaded * {
     .hero {
         height: auto;
         min-height: 100vh;
-        padding: 8rem 0 4rem;
+        padding: 6rem 0 2rem;
     }
 
     .hero-text h1 {
