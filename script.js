@@ -115,48 +115,49 @@ document.addEventListener('DOMContentLoaded', function() {
     if (contactForm) {
         const isNetlifyForm = contactForm.hasAttribute('data-netlify');
         contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+            resetMessage();
 
-            // Reset previous messages
-            formMessage.className = 'form-message';
-            formMessage.textContent = '';
-
-            // Get form values
             const formData = new FormData(contactForm);
             const data = Object.fromEntries(formData);
 
-            // Basic validation
             if (!data.name || !data.phone || !data.service || !data.address) {
+                e.preventDefault();
                 showMessage('Bitte füllen Sie alle erforderlichen Felder aus.', 'error');
                 return;
             }
 
-            // Email validation if provided
             if (data.email && !isValidEmail(data.email)) {
+                e.preventDefault();
                 showMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.', 'error');
                 return;
             }
 
-            // Phone validation
             if (!isValidPhone(data.phone)) {
+                e.preventDefault();
                 showMessage('Bitte geben Sie eine gültige Telefonnummer ein.', 'error');
                 return;
             }
 
             if (isNetlifyForm) {
-                contactForm.submit();
+                // Allow Netlify to handle submission normally
                 return;
             }
 
-            // Simulate form submission (replace with actual API call)
+            e.preventDefault();
             showMessage('Vielen Dank! Ihre Anfrage wurde erfolgreich übermittelt. Wir melden uns innerhalb von 24 Stunden bei Ihnen.', 'success');
-
-            // Reset form after successful submission
             contactForm.reset();
         });
     }
 
+    function resetMessage() {
+        if (!formMessage) return;
+        formMessage.className = 'form-message';
+        formMessage.textContent = '';
+        formMessage.style.display = 'none';
+    }
+
     function showMessage(message, type) {
+        if (!formMessage) return;
         formMessage.textContent = message;
         formMessage.classList.add(type);
         formMessage.style.display = 'block';
