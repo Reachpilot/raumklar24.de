@@ -113,39 +113,44 @@ document.addEventListener('DOMContentLoaded', function() {
     initMobileMenu(mobileToggle, navLinks);
 
     if (contactForm) {
-        const isNetlifyForm = contactForm.hasAttribute('data-netlify');
+        const formName = contactForm.getAttribute('name') || 'kontakt';
         contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
             resetMessage();
 
             const formData = new FormData(contactForm);
             const data = Object.fromEntries(formData);
 
             if (!data.name || !data.phone || !data.service || !data.address) {
-                e.preventDefault();
                 showMessage('Bitte füllen Sie alle erforderlichen Felder aus.', 'error');
                 return;
             }
 
             if (data.email && !isValidEmail(data.email)) {
-                e.preventDefault();
                 showMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.', 'error');
                 return;
             }
 
             if (!isValidPhone(data.phone)) {
-                e.preventDefault();
                 showMessage('Bitte geben Sie eine gültige Telefonnummer ein.', 'error');
                 return;
             }
 
-            if (isNetlifyForm) {
-                // Allow Netlify to handle submission normally
-                return;
-            }
-
-            e.preventDefault();
-            showMessage('Vielen Dank! Ihre Anfrage wurde erfolgreich übermittelt. Wir melden uns innerhalb von 24 Stunden bei Ihnen.', 'success');
-            contactForm.reset();
+            fetch('/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: encodeFormData({ 'form-name': formName, ...data })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Netzwerkfehler');
+                    }
+                    showMessage('Vielen Dank! Ihre Anfrage wurde erfolgreich übermittelt. Wir melden uns innerhalb von 24 Stunden bei Ihnen.', 'success');
+                    contactForm.reset();
+                })
+                .catch(() => {
+                    showMessage('Ups, etwas ist schief gelaufen. Bitte versuchen Sie es erneut.', 'error');
+                });
         });
     }
 
@@ -221,6 +226,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add validation class
         field.classList.add(isValid ? 'valid' : 'invalid');
+    }
+
+    function encodeFormData(data) {
+        return Object.keys(data)
+            .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key] ?? ''))
+            .join('&');
     }
 });
 
