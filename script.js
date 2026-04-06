@@ -113,6 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initMobileMenu(mobileToggle, navLinks);
 
     if (contactForm) {
+        const isNetlifyForm = contactForm.hasAttribute('data-netlify');
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -139,6 +140,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Phone validation
             if (!isValidPhone(data.phone)) {
                 showMessage('Bitte geben Sie eine gültige Telefonnummer ein.', 'error');
+                return;
+            }
+
+            if (isNetlifyForm) {
+                contactForm.submit();
                 return;
             }
 
